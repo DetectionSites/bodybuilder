@@ -212,10 +212,225 @@
 
 </label>
 
-
-
 </div>
 </div>
+
+ <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #ffffff;
+        }
+
+        /* Stopwatch Container */
+        .stopwatch-container {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        /* Time Display */
+        .display {
+            font-size: 3.5rem;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 40px;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .display span {
+            color: #38bdf8;
+        }
+
+        .display .ms {
+            font-size: 2.2rem;
+            color: #f43f5e;
+            align-self: flex-end;
+            margin-bottom: 6px;
+        }
+
+        /* Controls Button Container */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Button General Styles */
+        button {
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 110px;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Specific Button Colors */
+        #startBtn {
+            background-color: #10b981;
+            color: #fff;
+        }
+
+        #startBtn:hover {
+            background-color: #059669;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        #stopBtn {
+            background-color: #f43f5e;
+            color: #fff;
+        }
+
+        #stopBtn:hover {
+            background-color: #e11d48;
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+        }
+
+        #resetBtn {
+            background-color: #64748b;
+            color: #fff;
+        }
+
+        #resetBtn:hover {
+            background-color: #475569;
+            box-shadow: 0 0 15px rgba(100, 116, 139, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stopwatch-container">
+        <h1>Stopwatch</h1>
+
+        <!-- Display layout with separate fields for crisp layout positioning -->
+        <div class="display">
+            <span id="hours">00</span>:
+            <span id="minutes">00</span>:
+            <span id="seconds">00</span>
+            <span class="ms">.<span id="milliseconds">00</span></span>
+        </div>
+
+        <div class="controls">
+            <button id="startBtn" onclick="start()">Start</button>
+            <button id="stopBtn" onclick="stop()">Stop</button>
+            <button id="resetBtn" onclick="reset()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // State variables to maintain stopwatch execution data
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval;
+        let isRunning = false;
+
+        // DOM element selections
+        const hoursDisplay = document.getElementById('hours');
+        const minutesDisplay = document.getElementById('minutes');
+        const secondsDisplay = document.getElementById('seconds');
+        const millisecondsDisplay = document.getElementById('milliseconds');
+
+        function start() {
+            if (!isRunning) {
+                // Determine precise starting reference marker
+                startTime = Date.now() - elapsedTime;
+                // High-frequency interval update execution loop (every 10ms)
+                timerInterval = setInterval(updateTime, 10);
+                isRunning = true;
+            }
+        }
+
+        function stop() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                // Freeze the current timestamp difference accumulation
+                elapsedTime = Date.now() - startTime;
+                isRunning = false;
+            }
+        }
+
+        function reset() {
+            clearInterval(timerInterval);
+            // Reset all computational state parameters
+            startTime = 0;
+            elapsedTime = 0;
+            isRunning = false;
+
+            // Hard reset UI rendering strings back to zero values
+            hoursDisplay.textContent = "00";
+            minutesDisplay.textContent = "00";
+            secondsDisplay.textContent = "00";
+            millisecondsDisplay.textContent = "00";
+        }
+
+        function updateTime() {
+            // Find absolute temporal distance between starting marker and current instance
+            elapsedTime = Date.now() - startTime;
+
+            // Math transformations mapping MS intervals to base 60 structure metrics
+            let tempMs = Math.floor((elapsedTime % 1000) / 10);
+            let tempSecs = Math.floor((elapsedTime / 1000) % 60);
+            let tempMins = Math.floor((elapsedTime / (1000 * 60)) % 60);
+            let tempHours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
+
+            // Print values to screen, wrapping each inside a standard double-digit format function
+            hoursDisplay.textContent = padZero(tempHours);
+            minutesDisplay.textContent = padZero(tempMins);
+            secondsDisplay.textContent = padZero(tempSecs);
+            millisecondsDisplay.textContent = padZero(tempMs);
+        }
+
+        // Helper syntax utility ensuring numeric presentation keeps structural "00" format
+        function padZero(number) {
+            return number.toString().padStart(2, '0');
+        }
+    </script>
+
+
+
+
+  
   <footer>
     <p>Create. Develop. Design. Build. Sustain.</p>
     <p>By Web developer & Author/Inventor: Darren Ramon</p>
